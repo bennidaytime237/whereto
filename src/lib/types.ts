@@ -55,6 +55,7 @@ export interface ChainStats {
   volumeShare: number; // 0-1, share of total volume across all destination chains
   txShare: number; // 0-1, share of total tx count
   recentTxCount: number; // tx count in the last ~10 minutes
+  activityBuckets: number[]; // tx counts per 5-min bucket over the last hour (12 buckets)
 }
 
 export interface TokenStats {

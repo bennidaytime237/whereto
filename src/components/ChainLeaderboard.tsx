@@ -39,6 +39,32 @@ function getRankBadge(rank: number): string {
   return "chain-rank-default";
 }
 
+function Soundwave({ buckets, color }: { buckets: number[]; color: string }) {
+  const max = Math.max(...buckets, 1);
+  return (
+    <div className="flex items-center gap-[2px] w-full h-6">
+      {buckets.map((val, i) => {
+        const height = Math.max(0.1, val / max);
+        // Mirror: taller bars in center, shorter at edges — soundwave shape
+        const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.3;
+        const finalH = height * mirror;
+        return (
+          <div
+            key={i}
+            className="flex-1 rounded-full transition-all duration-500"
+            style={{
+              height: `${Math.round(finalH * 100)}%`,
+              minHeight: 2,
+              background: color,
+              opacity: 0.3 + finalH * 0.7,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 function HotBadge({ count }: { count: number }) {
   if (count === 0) return null;
   const label = count >= 5 ? "🔥 hot" : count >= 2 ? "↑ active" : "· recent";
@@ -121,15 +147,9 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
                 {formatUsd(chain.volumeUsd)}
               </div>
 
-              {/* Volume bar */}
-              <div className="w-full h-1.5 rounded-full bg-black/20 overflow-hidden mb-2">
-                <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
-                  style={{
-                    width: `${intensity * 100}%`,
-                    background: `linear-gradient(90deg, ${getHeatBorder(intensity)}, ${getHeatBorder(Math.min(1, intensity + 0.2))})`,
-                  }}
-                />
+              {/* Soundwave activity */}
+              <div className="mb-2">
+                <Soundwave buckets={chain.activityBuckets} color={getHeatBorder(intensity)} />
               </div>
 
               {/* Stats row */}

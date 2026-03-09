@@ -115,8 +115,25 @@ export function computeChainLeaderboard(
     recentCounts.set(d.destinationChainId, (recentCounts.get(d.destinationChainId) ?? 0) + 1);
   }
 
+  // Build 12 x 5-min activity buckets over the last hour per chain
+  const BUCKET_COUNT = 12;
+  const BUCKET_MS = 5 * 60 * 1000;
+  const now = Date.now();
+  const bucketMap = new Map<number, number[]>();
+  for (const d of deposits) {
+    const chainId = d.destinationChainId;
+    if (!bucketMap.has(chainId)) bucketMap.set(chainId, new Array(BUCKET_COUNT).fill(0));
+    const age = now - new Date(d.depositBlockTimestamp).getTime();
+    const bucketIdx = Math.min(BUCKET_COUNT - 1, Math.floor(age / BUCKET_MS));
+    // bucketIdx 0 = most recent, reverse so index 0 = oldest for display
+    bucketMap.get(chainId)![bucketIdx]++;
+  }
+
   const entries = Array.from(stats.entries()).map(([chainId, s]) => {
     const chain = chainMap.get(chainId);
+    const rawBuckets = bucketMap.get(chainId) ?? new Array(BUCKET_COUNT).fill(0);
+    // Reverse so left = oldest, right = most recent
+    const activityBuckets = [...rawBuckets].reverse();
     return {
       chainId,
       name: chain?.name ?? `Chain ${chainId}`,
@@ -128,6 +145,7 @@ export function computeChainLeaderboard(
       volumeShare: 0,
       txShare: 0,
       recentTxCount: recentCounts.get(chainId) ?? 0,
+      activityBuckets,
     };
   });
 
