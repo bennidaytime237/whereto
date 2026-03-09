@@ -23,6 +23,9 @@ export default function Home() {
         </a>
       </header>
       <Dashboard />
+      <footer className="mt-12 -mx-4">
+        <img src="/across-banner.svg" alt="Across Protocol" className="w-full" />
+      </footer>
     </main>
   );
 }
