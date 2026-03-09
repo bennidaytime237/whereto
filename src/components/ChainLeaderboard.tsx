@@ -1,3 +1,4 @@
+import React from "react";
 import type { ChainStats } from "@/lib/types";
 import { formatUsd, formatTime } from "@/lib/utils";
 
@@ -39,28 +40,71 @@ function getRankBadge(rank: number): string {
   return "chain-rank-default";
 }
 
-function Soundwave({ buckets, color }: { buckets: number[]; color: string }) {
-  const max = Math.max(...buckets, 1);
+function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: number }[]; color: string }) {
+  const [hovered, setHovered] = React.useState<{ idx: number; x: number; y: number } | null>(null);
+  const max = Math.max(...buckets.map((b) => b.txCount), 1);
+
+  const BUCKET_MINUTES = 5;
+  const BUCKET_COUNT = buckets.length;
+
+  function getBucketLabel(idx: number): string {
+    // idx 0 = oldest, idx (BUCKET_COUNT-1) = most recent
+    const minutesAgoEnd = (BUCKET_COUNT - 1 - idx) * BUCKET_MINUTES;
+    const minutesAgoStart = minutesAgoEnd + BUCKET_MINUTES;
+    if (minutesAgoEnd === 0) return `last ${BUCKET_MINUTES}m`;
+    return `${minutesAgoStart}–${minutesAgoEnd}m ago`;
+  }
+
   return (
-    <div className="flex items-center gap-[2px] w-full h-6">
-      {buckets.map((val, i) => {
-        const height = Math.max(0.1, val / max);
-        // Mirror: taller bars in center, shorter at edges — soundwave shape
-        const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.3;
+    <div
+      className="relative flex items-end gap-[2px] w-full h-16"
+      onMouseLeave={() => setHovered(null)}
+    >
+      {buckets.map((bucket, i) => {
+        const height = Math.max(0.1, bucket.txCount / max);
+        const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.15;
         const finalH = height * mirror;
         return (
           <div
             key={i}
-            className="flex-1 rounded-full transition-all duration-500"
-            style={{
-              height: `${Math.round(finalH * 100)}%`,
-              minHeight: 2,
-              background: color,
-              opacity: 0.3 + finalH * 0.7,
+            className="relative flex-1 flex items-end h-full cursor-default"
+            onMouseEnter={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setHovered({ idx: i, x: rect.left + rect.width / 2, y: rect.top });
             }}
-          />
+          >
+            <div
+              className="w-full rounded-full transition-all duration-500"
+              style={{
+                height: `${Math.round(finalH * 100)}%`,
+                minHeight: 2,
+                background: color,
+                opacity: 0.3 + finalH * 0.7,
+              }}
+            />
+          </div>
         );
       })}
+      {hovered !== null && (() => {
+        const b = buckets[hovered.idx];
+        return (
+          <div
+            className="fixed z-50 pointer-events-none rounded-md px-2 py-1.5 text-xs shadow-lg"
+            style={{
+              left: hovered.x,
+              top: hovered.y - 8,
+              transform: "translate(-50%, -100%)",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              color: "var(--text-primary)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <div className="font-semibold" style={{ color }}>{getBucketLabel(hovered.idx)}</div>
+            <div>{b.txCount} tx · {formatUsd(b.volumeUsd)}</div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -119,19 +119,22 @@ export function computeChainLeaderboard(
   const BUCKET_COUNT = 12;
   const BUCKET_MS = 5 * 60 * 1000;
   const now = Date.now();
-  const bucketMap = new Map<number, number[]>();
+  const bucketMap = new Map<number, { txCount: number; volumeUsd: number }[]>();
   for (const d of deposits) {
     const chainId = d.destinationChainId;
-    if (!bucketMap.has(chainId)) bucketMap.set(chainId, new Array(BUCKET_COUNT).fill(0));
+    if (!bucketMap.has(chainId))
+      bucketMap.set(chainId, Array.from({ length: BUCKET_COUNT }, () => ({ txCount: 0, volumeUsd: 0 })));
     const age = now - new Date(d.depositBlockTimestamp).getTime();
     const bucketIdx = Math.min(BUCKET_COUNT - 1, Math.floor(age / BUCKET_MS));
-    // bucketIdx 0 = most recent, reverse so index 0 = oldest for display
-    bucketMap.get(chainId)![bucketIdx]++;
+    const bucket = bucketMap.get(chainId)![bucketIdx];
+    bucket.txCount++;
+    bucket.volumeUsd += getDepositVolumeUsd(d, tokenMap);
   }
 
   const entries = Array.from(stats.entries()).map(([chainId, s]) => {
     const chain = chainMap.get(chainId);
-    const rawBuckets = bucketMap.get(chainId) ?? new Array(BUCKET_COUNT).fill(0);
+    const rawBuckets = bucketMap.get(chainId) ??
+      Array.from({ length: BUCKET_COUNT }, () => ({ txCount: 0, volumeUsd: 0 }));
     // Reverse so left = oldest, right = most recent
     const activityBuckets = [...rawBuckets].reverse();
     return {
