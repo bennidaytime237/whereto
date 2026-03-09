@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
-  const recent = deposits.slice(0, 20);
+  const recent = deposits.filter((d) => d.status === "filled").slice(0, 20);
 
   function getTokenSymbol(chainId: number, tokenAddress: string): string {
     const token = tokenMap.get(`${chainId}-${tokenAddress.toLowerCase()}`);
@@ -52,7 +52,6 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
               <th className="text-left p-4 font-medium">Token</th>
               <th className="text-right p-4 font-medium">Amount</th>
               <th className="text-right p-4 font-medium">Bridge Time</th>
-              <th className="text-left p-4 font-medium">Status</th>
               <th className="text-left p-4 font-medium">Tx</th>
             </tr>
           </thead>
@@ -91,17 +90,6 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
                   </td>
                   <td className="p-4 text-right tabular-nums text-[var(--text-secondary)]">
                     {getBridgeTime(d)}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                        d.status === "filled"
-                          ? "bg-[var(--green)]/15 text-[var(--green)]"
-                          : "bg-yellow-500/15 text-yellow-400"
-                      }`}
-                    >
-                      {d.status}
-                    </span>
                   </td>
                   <td className="p-4">
                     {explorerLink ? (
