@@ -23,8 +23,9 @@ export default function Home() {
         </a>
       </header>
       <Dashboard />
-      <footer className="mt-12 -mx-4">
-        <img src="/across-banner.svg" alt="Across Protocol" className="w-full" />
+      <footer className="mt-12 pt-6 border-t border-[var(--border)] flex items-center justify-center gap-3">
+        <span className="text-xs text-[var(--text-secondary)]">Powered by</span>
+        <img src="/across-banner.svg" alt="Across Protocol" className="h-6 opacity-70 hover:opacity-100 transition-opacity" />
       </footer>
     </main>
   );
