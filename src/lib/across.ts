@@ -14,9 +14,20 @@ export async function fetchTokens(): Promise<AcrossToken[]> {
   return res.json();
 }
 
-export async function fetchDeposits(limit = 1000): Promise<AcrossDeposit[]> {
+export async function fetchDeposits(limit = 500): Promise<AcrossDeposit[]> {
   const res = await fetch(`${BASE_URL}/deposits?limit=${limit}`);
   if (!res.ok) throw new Error("Failed to fetch deposits");
+  return res.json();
+}
+
+/** Fetch all data in one request via our cached server-side proxy */
+export async function fetchAllData(): Promise<{
+  chains: AcrossChain[];
+  tokens: AcrossToken[];
+  deposits: AcrossDeposit[];
+}> {
+  const res = await fetch("/api/data");
+  if (!res.ok) throw new Error("Failed to fetch data");
   return res.json();
 }
 

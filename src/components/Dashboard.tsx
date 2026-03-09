@@ -2,9 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import {
-  fetchChains,
-  fetchTokens,
-  fetchDeposits,
+  fetchAllData,
   filterDepositsLastHours,
   buildChainMap,
   buildTokenMap,
@@ -46,11 +44,7 @@ export function Dashboard() {
       if (!isRefresh) setLoading(true);
       setError(null);
 
-      const [chains, tokens, allDeps] = await Promise.all([
-        fetchChains(),
-        fetchTokens(),
-        fetchDeposits(1000),
-      ]);
+      const { chains, tokens, deposits: allDeps } = await fetchAllData();
 
       const deps = filterDepositsLastHours(allDeps, TIME_WINDOW_HOURS);
 
