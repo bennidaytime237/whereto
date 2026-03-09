@@ -39,6 +39,26 @@ function getRankBadge(rank: number): string {
   return "chain-rank-default";
 }
 
+function HotBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  const label = count >= 5 ? "🔥 hot" : count >= 2 ? "↑ active" : "· recent";
+  const style =
+    count >= 5
+      ? { color: "#ff6b6b", background: "rgba(255, 107, 107, 0.15)", border: "1px solid rgba(255, 107, 107, 0.3)" }
+      : count >= 2
+      ? { color: "#f59e0b", background: "rgba(245, 158, 11, 0.12)", border: "1px solid rgba(245, 158, 11, 0.25)" }
+      : { color: "#9a9ba8", background: "rgba(154, 155, 168, 0.1)", border: "1px solid rgba(154, 155, 168, 0.2)" };
+  return (
+    <span
+      className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none"
+      style={style}
+      title={`${count} tx in last 10 min`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
   // Normalize intensities: the top chain = 1.0
   const maxShare = chains[0]?.volumeShare ?? 1;
@@ -49,7 +69,7 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
         <div>
           <h2 className="text-2xl font-bold">Where is the money going?</h2>
           <p className="text-[var(--text-secondary)] mt-1">
-            Destination chains ranked by inflow volume &middot; last 10 minutes
+            Destination chains ranked by inflow volume &middot; last hour
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-xs text-[var(--text-secondary)]">
@@ -92,7 +112,8 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
                     className="w-5 h-5 rounded-full"
                   />
                 )}
-                <span className="text-sm font-semibold truncate">{chain.name}</span>
+                <span className="text-sm font-semibold truncate flex-1">{chain.name}</span>
+                <HotBadge count={chain.recentTxCount} />
               </div>
 
               {/* Volume */}

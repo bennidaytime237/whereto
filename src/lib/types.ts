@@ -54,6 +54,7 @@ export interface ChainStats {
   avgBridgeTimeSec: number;
   volumeShare: number; // 0-1, share of total volume across all destination chains
   txShare: number; // 0-1, share of total tx count
+  recentTxCount: number; // tx count in the last ~10 minutes
 }
 
 export interface TokenStats {

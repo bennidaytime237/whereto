@@ -83,7 +83,8 @@ export function computeOverviewStats(
 export function computeChainLeaderboard(
   deposits: AcrossDeposit[],
   chainMap: ChainMap,
-  tokenMap: TokenMap
+  tokenMap: TokenMap,
+  recentDeposits: AcrossDeposit[] = []
 ): ChainStats[] {
   const stats = new Map<
     number,
@@ -108,6 +109,12 @@ export function computeChainLeaderboard(
     stats.set(chainId, entry);
   }
 
+  // Count recent tx per destination chain
+  const recentCounts = new Map<number, number>();
+  for (const d of recentDeposits) {
+    recentCounts.set(d.destinationChainId, (recentCounts.get(d.destinationChainId) ?? 0) + 1);
+  }
+
   const entries = Array.from(stats.entries()).map(([chainId, s]) => {
     const chain = chainMap.get(chainId);
     return {
@@ -120,6 +127,7 @@ export function computeChainLeaderboard(
       avgBridgeTimeSec: s.bridgeTimeCount > 0 ? s.bridgeTimeSum / s.bridgeTimeCount : 0,
       volumeShare: 0,
       txShare: 0,
+      recentTxCount: recentCounts.get(chainId) ?? 0,
     };
   });
 
