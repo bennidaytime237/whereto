@@ -1,5 +1,4 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import type { ChainStats } from "@/lib/types";
 import { formatUsd, formatTime } from "@/lib/utils";
 
@@ -42,7 +41,7 @@ function getRankBadge(rank: number): string {
 }
 
 function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: number }[]; color: string }) {
-  const [hovered, setHovered] = React.useState<{ idx: number; mouseX: number; mouseY: number } | null>(null);
+  const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
   const max = Math.max(...buckets.map((b) => b.txCount), 1);
 
   const BUCKET_MINUTES = 5;
@@ -58,53 +57,46 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
   return (
     <div
       className="relative flex items-center gap-[2px] w-full h-16"
-      onMouseLeave={() => setHovered(null)}
+      onMouseLeave={() => setHoveredIdx(null)}
     >
       {buckets.map((bucket, i) => {
         const height = Math.max(0.1, bucket.txCount / max);
         const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.15;
         const finalH = height * mirror;
+        const isHovered = hoveredIdx === i;
         return (
           <div
             key={i}
             className="relative flex-1 h-full cursor-default flex items-center"
-            onMouseMove={(e) => setHovered({ idx: i, mouseX: e.clientX, mouseY: e.clientY })}
+            onMouseEnter={() => setHoveredIdx(i)}
           >
             <div
-              className="w-full rounded-full transition-all duration-500"
+              className="w-full rounded-full transition-all duration-300"
               style={{
                 height: `${Math.max(2, Math.round(finalH * 64))}px`,
                 background: color,
-                opacity: 0.3 + finalH * 0.7,
+                opacity: isHovered ? 1 : 0.3 + finalH * 0.7,
               }}
             />
+            {isHovered && (
+              <div
+                className="absolute bottom-full mb-1 left-1/2 pointer-events-none rounded px-1.5 py-1 text-[10px] leading-tight shadow-lg"
+                style={{
+                  transform: "translateX(-50%)",
+                  background: "#1a1b1f",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  color: "#fff",
+                  whiteSpace: "nowrap",
+                  zIndex: 10,
+                }}
+              >
+                <div className="font-semibold" style={{ color }}>{getBucketLabel(i)}</div>
+                <div className="text-gray-300">{bucket.txCount} tx · {formatUsd(bucket.volumeUsd)}</div>
+              </div>
+            )}
           </div>
         );
       })}
-      {hovered !== null && typeof document !== "undefined" && createPortal(
-        (() => {
-          const b = buckets[hovered.idx];
-          return (
-            <div
-              className="pointer-events-none rounded-md px-2 py-1.5 text-xs shadow-lg"
-              style={{
-                position: "fixed",
-                left: hovered.mouseX + 12,
-                top: hovered.mouseY - 28,
-                zIndex: 99999,
-                background: "#1a1b1f",
-                border: "1px solid rgba(255,255,255,0.15)",
-                color: "#fff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <div className="font-semibold" style={{ color }}>{getBucketLabel(hovered.idx)}</div>
-              <div className="text-gray-300">{b.txCount} tx · {formatUsd(b.volumeUsd)}</div>
-            </div>
-          );
-        })(),
-        document.body
-      )}
     </div>
   );
 }
