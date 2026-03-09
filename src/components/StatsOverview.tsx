@@ -17,7 +17,7 @@ export function StatsOverview({ stats }: { stats: OverviewStats }) {
           className="stat-card rounded-xl p-5 border border-[var(--border)] bg-[var(--bg-card)]"
         >
           <p className="text-sm text-[var(--text-secondary)] mb-1">{card.label}</p>
-          <p className="text-2xl font-bold">{card.value}</p>
+          <p className="text-2xl font-bold text-[var(--accent)]">{card.value}</p>
         </div>
       ))}
     </div>

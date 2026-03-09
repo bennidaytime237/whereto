@@ -97,7 +97,7 @@ export function Dashboard() {
         <p className="text-[var(--text-secondary)] text-sm mb-4">{error}</p>
         <button
           onClick={() => loadData()}
-          className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          className="px-4 py-2 rounded-lg bg-[var(--accent)] text-black text-sm font-medium hover:opacity-90 transition-opacity"
         >
           Retry
         </button>

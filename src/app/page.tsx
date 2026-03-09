@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="max-w-7xl mx-auto px-4 py-8">
       <header className="mb-10">
-        <h1 className="text-4xl font-bold tracking-tight">
+        <h1 className="text-4xl font-bold tracking-tight text-[var(--accent)]">
           Where To?
         </h1>
         <p className="mt-2 text-[var(--text-secondary)] text-lg">
