@@ -57,7 +57,7 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
 
   return (
     <div
-      className="relative flex items-end gap-[2px] w-full h-16"
+      className="relative flex items-center gap-[2px] w-full h-16"
       onMouseLeave={() => setHovered(null)}
     >
       {buckets.map((bucket, i) => {
@@ -67,14 +67,13 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
         return (
           <div
             key={i}
-            className="relative flex-1 flex items-end h-full cursor-default"
+            className="relative flex-1 h-full cursor-default flex items-center"
             onMouseMove={(e) => setHovered({ idx: i, mouseX: e.clientX, mouseY: e.clientY })}
           >
             <div
               className="w-full rounded-full transition-all duration-500"
               style={{
-                height: `${Math.round(finalH * 100)}%`,
-                minHeight: 2,
+                height: `${Math.max(2, Math.round(finalH * 64))}px`,
                 background: color,
                 opacity: 0.3 + finalH * 0.7,
               }}
