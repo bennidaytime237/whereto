@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import type { ChainStats } from "@/lib/types";
 import { formatUsd, formatTime } from "@/lib/utils";
 
@@ -81,26 +82,30 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
           </div>
         );
       })}
-      {hovered !== null && (() => {
-        const b = buckets[hovered.idx];
-        return (
-          <div
-            className="fixed z-50 pointer-events-none rounded-md px-2 py-1.5 text-xs shadow-lg"
-            style={{
-              left: hovered.mouseX,
-              top: hovered.mouseY - 12,
-              transform: "translate(-50%, -100%)",
-              background: "var(--bg-card)",
-              border: "1px solid var(--border)",
-              color: "var(--text-primary)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <div className="font-semibold" style={{ color }}>{getBucketLabel(hovered.idx)}</div>
-            <div>{b.txCount} tx · {formatUsd(b.volumeUsd)}</div>
-          </div>
-        );
-      })()}
+      {hovered !== null && typeof document !== "undefined" && createPortal(
+        (() => {
+          const b = buckets[hovered.idx];
+          return (
+            <div
+              className="pointer-events-none rounded-md px-2 py-1.5 text-xs shadow-lg"
+              style={{
+                position: "fixed",
+                left: hovered.mouseX + 12,
+                top: hovered.mouseY - 28,
+                zIndex: 99999,
+                background: "#1a1b1f",
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "#fff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <div className="font-semibold" style={{ color }}>{getBucketLabel(hovered.idx)}</div>
+              <div className="text-gray-300">{b.txCount} tx · {formatUsd(b.volumeUsd)}</div>
+            </div>
+          );
+        })(),
+        document.body
+      )}
     </div>
   );
 }
