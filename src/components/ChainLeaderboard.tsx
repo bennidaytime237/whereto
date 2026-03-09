@@ -41,14 +41,13 @@ function getRankBadge(rank: number): string {
 }
 
 function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: number }[]; color: string }) {
-  const [hovered, setHovered] = React.useState<{ idx: number; x: number; y: number } | null>(null);
+  const [hovered, setHovered] = React.useState<{ idx: number; mouseX: number; mouseY: number } | null>(null);
   const max = Math.max(...buckets.map((b) => b.txCount), 1);
 
   const BUCKET_MINUTES = 5;
   const BUCKET_COUNT = buckets.length;
 
   function getBucketLabel(idx: number): string {
-    // idx 0 = oldest, idx (BUCKET_COUNT-1) = most recent
     const minutesAgoEnd = (BUCKET_COUNT - 1 - idx) * BUCKET_MINUTES;
     const minutesAgoStart = minutesAgoEnd + BUCKET_MINUTES;
     if (minutesAgoEnd === 0) return `last ${BUCKET_MINUTES}m`;
@@ -68,10 +67,7 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
           <div
             key={i}
             className="relative flex-1 flex items-end h-full cursor-default"
-            onMouseEnter={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setHovered({ idx: i, x: rect.left + rect.width / 2, y: rect.top });
-            }}
+            onMouseMove={(e) => setHovered({ idx: i, mouseX: e.clientX, mouseY: e.clientY })}
           >
             <div
               className="w-full rounded-full transition-all duration-500"
@@ -91,8 +87,8 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
           <div
             className="fixed z-50 pointer-events-none rounded-md px-2 py-1.5 text-xs shadow-lg"
             style={{
-              left: hovered.x,
-              top: hovered.y - 8,
+              left: hovered.mouseX,
+              top: hovered.mouseY - 12,
               transform: "translate(-50%, -100%)",
               background: "var(--bg-card)",
               border: "1px solid var(--border)",
