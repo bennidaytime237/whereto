@@ -4,7 +4,8 @@ import { formatUsd } from "@/lib/utils";
 export function TokenLeaderboard({ tokens }: { tokens: TokenStats[] }) {
   return (
     <section className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Top Tokens Bridged</h2>
+      <h2 className="text-xl font-semibold mb-1">Top Tokens Bridged</h2>
+      <p className="text-sm text-[var(--text-secondary)] mb-4">Last hour</p>
       <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
         <table className="w-full text-sm">
           <thead>

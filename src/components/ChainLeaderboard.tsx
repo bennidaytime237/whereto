@@ -49,7 +49,7 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
         <div>
           <h2 className="text-2xl font-bold">Where is the money going?</h2>
           <p className="text-[var(--text-secondary)] mt-1">
-            Destination chains ranked by inflow volume &middot; last hour
+            Destination chains ranked by inflow volume &middot; last 10 minutes
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-xs text-[var(--text-secondary)]">

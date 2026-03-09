@@ -23,7 +23,8 @@ import { RouteLeaderboard } from "./RouteLeaderboard";
 import { RecentTransactions } from "./RecentTransactions";
 
 const REFRESH_INTERVAL = 30_000;
-const TIME_WINDOW_HOURS = 1;
+const CHAIN_WINDOW_HOURS = 10 / 60; // 10 minutes
+const LEADERBOARD_WINDOW_HOURS = 1;  // 1 hour
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -46,19 +47,21 @@ export function Dashboard() {
 
       const { chains, tokens, deposits: allDeps } = await fetchAllData();
 
-      const deps = filterDepositsLastHours(allDeps, TIME_WINDOW_HOURS);
-
       const cMap = buildChainMap(chains);
       const tMap = buildTokenMap(tokens);
 
+      // Chain heatmap uses last 10 minutes; leaderboards use last 1 hour
+      const deps10m = filterDepositsLastHours(allDeps, CHAIN_WINDOW_HOURS);
+      const deps1h = filterDepositsLastHours(allDeps, LEADERBOARD_WINDOW_HOURS);
+
       setChainMap(cMap);
       setTokenMap(tMap);
-      setDeposits(deps);
+      setDeposits(deps1h);
 
-      setOverview(computeOverviewStats(deps, tMap));
-      setChainLeaderboard(computeChainLeaderboard(deps, cMap, tMap));
-      setTokenLeaderboard(computeTokenLeaderboard(deps, tMap));
-      setRouteLeaderboard(computeRouteLeaderboard(deps, cMap, tMap));
+      setOverview(computeOverviewStats(deps1h, tMap));
+      setChainLeaderboard(computeChainLeaderboard(deps10m, cMap, tMap));
+      setTokenLeaderboard(computeTokenLeaderboard(deps1h, tMap));
+      setRouteLeaderboard(computeRouteLeaderboard(deps1h, cMap, tMap));
       setLastUpdated(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
