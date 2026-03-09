@@ -1,0 +1,48 @@
+import type { TokenStats } from "@/lib/types";
+import { formatUsd } from "@/lib/utils";
+
+export function TokenLeaderboard({ tokens }: { tokens: TokenStats[] }) {
+  return (
+    <section className="mb-8">
+      <h2 className="text-xl font-semibold mb-4">Top Tokens Bridged</h2>
+      <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+              <th className="text-left p-4 font-medium">#</th>
+              <th className="text-left p-4 font-medium">Token</th>
+              <th className="text-right p-4 font-medium">Txns</th>
+              <th className="text-right p-4 font-medium">Volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tokens.map((token, i) => (
+              <tr
+                key={token.symbol}
+                className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg-secondary)] transition-colors"
+              >
+                <td className="p-4 text-[var(--text-secondary)]">{i + 1}</td>
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    {token.logoUrl && (
+                      <img
+                        src={token.logoUrl}
+                        alt={token.symbol}
+                        className="w-5 h-5 rounded-full"
+                      />
+                    )}
+                    <span className="font-medium">{token.symbol}</span>
+                  </div>
+                </td>
+                <td className="p-4 text-right tabular-nums">{token.txCount}</td>
+                <td className="p-4 text-right tabular-nums font-medium">
+                  {formatUsd(token.volumeUsd)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
