@@ -65,77 +65,56 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {chains.map((chain, i) => {
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {chains.slice(0, 10).map((chain, i) => {
           const intensity = maxShare > 0 ? chain.volumeShare / maxShare : 0;
           const rank = i + 1;
 
           return (
             <div
               key={chain.chainId}
-              className={`chain-card relative rounded-xl p-5 transition-all duration-300 hover:scale-[1.02] ${
-                rank <= 3 ? "sm:col-span-1" : ""
-              }`}
+              className="chain-card relative rounded-lg p-3 transition-all duration-300 hover:scale-[1.02]"
               style={{
                 background: `linear-gradient(135deg, ${getHeatColor(intensity)}, var(--bg-card))`,
                 border: `1px solid ${getHeatBorder(intensity)}`,
                 boxShadow: getHeatGlow(intensity),
               }}
             >
-              {/* Rank badge */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <span className={`rank-badge ${getRankBadge(rank)}`}>
-                    {rank}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {chain.logoUrl && (
-                      <img
-                        src={chain.logoUrl}
-                        alt={chain.name}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <span className="text-lg font-semibold">{chain.name}</span>
-                  </div>
-                </div>
-                <span className="text-xs text-[var(--text-secondary)] tabular-nums">
-                  {(chain.volumeShare * 100).toFixed(1)}%
+              {/* Rank + chain identity */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`rank-badge ${getRankBadge(rank)}`} style={{ width: 22, height: 22, fontSize: 11 }}>
+                  {rank}
                 </span>
+                {chain.logoUrl && (
+                  <img
+                    src={chain.logoUrl}
+                    alt={chain.name}
+                    className="w-5 h-5 rounded-full"
+                  />
+                )}
+                <span className="text-sm font-semibold truncate">{chain.name}</span>
+              </div>
+
+              {/* Volume */}
+              <div className="text-base font-bold tabular-nums mb-1.5">
+                {formatUsd(chain.volumeUsd)}
               </div>
 
               {/* Volume bar */}
-              <div className="mb-3">
-                <div className="flex items-baseline justify-between mb-1.5">
-                  <span className="text-2xl font-bold tabular-nums">
-                    {formatUsd(chain.volumeUsd)}
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-black/20 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-700 ease-out"
-                    style={{
-                      width: `${intensity * 100}%`,
-                      background: `linear-gradient(90deg, ${getHeatBorder(intensity)}, ${getHeatBorder(Math.min(1, intensity + 0.2))})`,
-                    }}
-                  />
-                </div>
+              <div className="w-full h-1.5 rounded-full bg-black/20 overflow-hidden mb-2">
+                <div
+                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  style={{
+                    width: `${intensity * 100}%`,
+                    background: `linear-gradient(90deg, ${getHeatBorder(intensity)}, ${getHeatBorder(Math.min(1, intensity + 0.2))})`,
+                  }}
+                />
               </div>
 
               {/* Stats row */}
-              <div className="flex items-center gap-4 text-sm">
-                <div>
-                  <span className="text-[var(--text-secondary)]">Txns </span>
-                  <span className="font-medium tabular-nums">{chain.txCount}</span>
-                </div>
-                <div>
-                  <span className="text-[var(--text-secondary)]">Avg </span>
-                  <span className="font-medium tabular-nums">{formatTime(chain.avgBridgeTimeSec)}</span>
-                </div>
-                <div>
-                  <span className="text-[var(--text-secondary)]">Share </span>
-                  <span className="font-medium tabular-nums">{(chain.txShare * 100).toFixed(0)}% txns</span>
-                </div>
+              <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                <span className="tabular-nums">{chain.txCount} txns</span>
+                <span className="tabular-nums">{(chain.volumeShare * 100).toFixed(1)}%</span>
               </div>
             </div>
           );
