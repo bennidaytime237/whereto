@@ -58,38 +58,40 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
 
   return (
     <div
-      className="relative flex items-end gap-[2px] w-full h-16"
+      className="relative flex items-center gap-[2px] w-full h-16"
       onMouseLeave={() => setHoveredIdx(null)}
     >
       {buckets.map((bucket, i) => {
         const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.15;
-        // volume = bottom segment, tx = top segment
-        const volH  = Math.max(2, Math.round((bucket.volumeUsd / maxVol) * TOTAL_H * 0.55 * mirror));
-        const txH   = Math.max(2, Math.round((bucket.txCount  / maxTx)  * TOTAL_H * 0.45 * mirror));
+        // Each half grows outward from center
+        const volHalf = Math.max(1, Math.round((bucket.volumeUsd / maxVol) * (TOTAL_H / 2) * 0.9 * mirror));
+        const txHalf  = Math.max(1, Math.round((bucket.txCount  / maxTx)  * (TOTAL_H / 2) * 0.9 * mirror));
         const isHovered = hoveredIdx === i;
 
         return (
           <div
             key={i}
-            className="relative flex-1 h-full cursor-default flex flex-col justify-end"
+            className="relative flex-1 h-full cursor-default flex flex-col items-center justify-center"
             onMouseEnter={() => setHoveredIdx(i)}
           >
-            {/* tx count — top segment */}
+            {/* tx count — top half, grows upward */}
             <div
               className="w-full rounded-t-full transition-all duration-300"
               style={{
-                height: `${txH}px`,
+                height: `${txHalf}px`,
                 background: color,
-                opacity: isHovered ? 1 : 0.75,
+                opacity: isHovered ? 1 : 0.8,
               }}
             />
-            {/* volume — bottom segment */}
+            {/* 1px gap in the middle */}
+            <div className="w-full" style={{ height: 1 }} />
+            {/* volume — bottom half, grows downward */}
             <div
               className="w-full rounded-b-full transition-all duration-300"
               style={{
-                height: `${volH}px`,
+                height: `${volHalf}px`,
                 background: color,
-                opacity: isHovered ? 0.5 : 0.3,
+                opacity: isHovered ? 0.55 : 0.35,
               }}
             />
             {isHovered && (
@@ -202,10 +204,21 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
                 <Soundwave buckets={chain.activityBuckets} color={getHeatBorder(intensity)} />
               </div>
 
-              {/* Stats row */}
-              <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
-                <span className="tabular-nums">{chain.txCount} txns</span>
-                <span className="tabular-nums">{(chain.volumeShare * 100).toFixed(1)}%</span>
+              {/* Volume share bar */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] mb-1">
+                  <span className="tabular-nums">{chain.txCount} txns</span>
+                  <span className="tabular-nums">{(chain.volumeShare * 100).toFixed(1)}%</span>
+                </div>
+                <div className="w-full h-1 rounded-full bg-white/10">
+                  <div
+                    className="h-1 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(chain.volumeShare * 100).toFixed(1)}%`,
+                      background: getHeatBorder(intensity),
+                    }}
+                  />
+                </div>
               </div>
             </div>
           );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   fetchAllData,
   filterDepositsLastHours,
@@ -30,6 +30,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [secondsAgo, setSecondsAgo] = useState(0);
 
   const [chainMap, setChainMap] = useState<ChainMap>(new Map());
   const [tokenMap, setTokenMap] = useState<TokenMap>(new Map());
@@ -76,6 +77,15 @@ export function Dashboard() {
     return () => clearInterval(interval);
   }, [loadData]);
 
+  useEffect(() => {
+    if (!lastUpdated) return;
+    setSecondsAgo(0);
+    const ticker = setInterval(() => {
+      setSecondsAgo(Math.floor((Date.now() - lastUpdated.getTime()) / 1000));
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, [lastUpdated]);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -111,9 +121,12 @@ export function Dashboard() {
   return (
     <div>
       {lastUpdated && (
-        <p className="text-xs text-[var(--text-secondary)] mb-6 text-right">
-          Updated {lastUpdated.toLocaleTimeString()} &middot; refreshes every 30s
-        </p>
+        <div className="flex items-center justify-end gap-2 mb-6">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <p className="text-xs text-[var(--text-secondary)]">
+            updated {secondsAgo < 5 ? "just now" : `${secondsAgo}s ago`} &middot; refreshes every 30s
+          </p>
+        </div>
       )}
 
       {/* Hero: Stats overview */}
