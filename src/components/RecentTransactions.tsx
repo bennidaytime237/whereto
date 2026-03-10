@@ -4,8 +4,8 @@ import type { ChainMap, TokenMap } from "@/lib/across";
 import { formatUsd, timeAgo, shortenAddress } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
-const WHALE_THRESHOLD = 50_000;   // $50k+
-const SHARK_THRESHOLD = 10_000;   // $10k+
+const WHALE_THRESHOLD = 10_000;   // $10k+
+const SHARK_THRESHOLD = 2_500;    // $2.5k+
 
 interface Props {
   deposits: AcrossDeposit[];
@@ -78,9 +78,9 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
       <div className="flex items-baseline gap-3 mb-4">
         <h2 className="text-xl font-semibold">Recent Transactions</h2>
         <span className="text-xs text-[var(--text-secondary)]">
-          <span style={{ color: "#f59e0b" }}>🐋 $50k+</span>
+          <span style={{ color: "#f59e0b" }}>🐋 $10k+</span>
           <span className="mx-2 opacity-40">·</span>
-          <span style={{ color: "#818cf8" }}>🦈 $10k+</span>
+          <span style={{ color: "#818cf8" }}>🦈 $2.5k+</span>
         </span>
       </div>
       <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
