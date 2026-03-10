@@ -76,6 +76,16 @@ export interface RouteStats {
   volumeUsd: number;
 }
 
+export interface OriginChainStats {
+  chainId: number;
+  name: string;
+  logoUrl: string;
+  txCount: number;
+  volumeUsd: number;
+  volumeShare: number; // 0-1 of total outflow volume
+  txShare: number;
+}
+
 export interface OverviewStats {
   totalVolumeUsd: number;
   totalTransactions: number;

@@ -4,11 +4,39 @@ import type { ChainMap, TokenMap } from "@/lib/across";
 import { formatUsd, timeAgo, shortenAddress } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
+const WHALE_THRESHOLD = 50_000;   // $50k+
+const SHARK_THRESHOLD = 10_000;   // $10k+
 
 interface Props {
   deposits: AcrossDeposit[];
   chainMap: ChainMap;
   tokenMap: TokenMap;
+}
+
+function WhaleBadge({ usd }: { usd: number }) {
+  if (usd >= WHALE_THRESHOLD) {
+    return (
+      <span
+        className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded"
+        style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
+        title="Whale transaction"
+      >
+        🐋
+      </span>
+    );
+  }
+  if (usd >= SHARK_THRESHOLD) {
+    return (
+      <span
+        className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded"
+        style={{ background: "rgba(99,102,241,0.15)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.3)" }}
+        title="Large transaction"
+      >
+        🦈
+      </span>
+    );
+  }
+  return null;
 }
 
 export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
@@ -47,7 +75,14 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
 
   return (
     <section className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+      <div className="flex items-baseline gap-3 mb-4">
+        <h2 className="text-xl font-semibold">Recent Transactions</h2>
+        <span className="text-xs text-[var(--text-secondary)]">
+          <span style={{ color: "#f59e0b" }}>🐋 $50k+</span>
+          <span className="mx-2 opacity-40">·</span>
+          <span style={{ color: "#818cf8" }}>🦈 $10k+</span>
+        </span>
+      </div>
       <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
         <table className="w-full text-sm">
           <thead>
@@ -73,11 +108,27 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
               const origin = chainMap.get(d.originChainId);
               const dest = chainMap.get(d.destinationChainId);
               const explorerLink = getExplorerLink(d);
+              const usd = getVolumeUsd(d);
+              const isWhale = usd >= WHALE_THRESHOLD;
+              const isShark = !isWhale && usd >= SHARK_THRESHOLD;
 
               return (
                 <tr
                   key={d.id}
-                  className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg-secondary)] transition-colors"
+                  className="border-b border-[var(--border)] last:border-0 transition-colors"
+                  style={
+                    isWhale
+                      ? {
+                          background: "rgba(245,158,11,0.06)",
+                          boxShadow: "inset 3px 0 0 rgba(245,158,11,0.5)",
+                        }
+                      : isShark
+                      ? {
+                          background: "rgba(99,102,241,0.05)",
+                          boxShadow: "inset 3px 0 0 rgba(99,102,241,0.4)",
+                        }
+                      : undefined
+                  }
                 >
                   <td className="p-4 text-[var(--text-secondary)] whitespace-nowrap">
                     {timeAgo(d.depositBlockTimestamp)}
@@ -102,7 +153,20 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
                     {getTokenSymbol(d.originChainId, d.inputToken)}
                   </td>
                   <td className="p-4 text-right tabular-nums font-medium">
-                    {formatUsd(getVolumeUsd(d))}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <WhaleBadge usd={usd} />
+                      <span
+                        style={
+                          isWhale
+                            ? { color: "#fbbf24" }
+                            : isShark
+                            ? { color: "#a5b4fc" }
+                            : undefined
+                        }
+                      >
+                        {formatUsd(usd)}
+                      </span>
+                    </div>
                   </td>
                   <td className="p-4 text-right tabular-nums text-[var(--text-secondary)]">
                     {getBridgeTime(d)}

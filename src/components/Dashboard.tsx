@@ -9,15 +9,17 @@ import {
   type ChainMap,
   type TokenMap,
 } from "@/lib/across";
-import type { AcrossDeposit, ChainStats, TokenStats, RouteStats, OverviewStats } from "@/lib/types";
+import type { AcrossDeposit, ChainStats, OriginChainStats, TokenStats, RouteStats, OverviewStats } from "@/lib/types";
 import {
   computeOverviewStats,
   computeChainLeaderboard,
+  computeOriginChainLeaderboard,
   computeTokenLeaderboard,
   computeRouteLeaderboard,
 } from "@/lib/utils";
 import { StatsOverview } from "./StatsOverview";
 import { ChainLeaderboard } from "./ChainLeaderboard";
+import { OriginChainLeaderboard } from "./OriginChainLeaderboard";
 import { TokenLeaderboard } from "./TokenLeaderboard";
 import { RouteLeaderboard } from "./RouteLeaderboard";
 import { RecentTransactions } from "./RecentTransactions";
@@ -38,6 +40,7 @@ export function Dashboard() {
 
   const [overview, setOverview] = useState<OverviewStats | null>(null);
   const [chainLeaderboard, setChainLeaderboard] = useState<ChainStats[]>([]);
+  const [originLeaderboard, setOriginLeaderboard] = useState<OriginChainStats[]>([]);
   const [tokenLeaderboard, setTokenLeaderboard] = useState<TokenStats[]>([]);
   const [routeLeaderboard, setRouteLeaderboard] = useState<RouteStats[]>([]);
 
@@ -61,6 +64,7 @@ export function Dashboard() {
 
       setOverview(computeOverviewStats(deps1h, tMap, cMap));
       setChainLeaderboard(computeChainLeaderboard(deps1h, cMap, tMap, deps10m));
+      setOriginLeaderboard(computeOriginChainLeaderboard(deps1h, cMap, tMap));
       setTokenLeaderboard(computeTokenLeaderboard(deps1h, tMap));
       setRouteLeaderboard(computeRouteLeaderboard(deps1h, cMap, tMap));
       setLastUpdated(new Date());
@@ -135,10 +139,13 @@ export function Dashboard() {
       {/* Primary: Chain destination heatmap */}
       <ChainLeaderboard chains={chainLeaderboard} />
 
-      {/* Supporting: routes, tokens, recent txns */}
+      {/* Supporting: origin chains + routes/tokens side-by-side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <RouteLeaderboard routes={routeLeaderboard} />
-        <TokenLeaderboard tokens={tokenLeaderboard} />
+        <OriginChainLeaderboard chains={originLeaderboard} />
+        <div className="flex flex-col gap-6">
+          <TokenLeaderboard tokens={tokenLeaderboard} />
+          <RouteLeaderboard routes={routeLeaderboard} />
+        </div>
       </div>
 
       <RecentTransactions deposits={deposits} chainMap={chainMap} tokenMap={tokenMap} />

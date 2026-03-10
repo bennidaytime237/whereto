@@ -1,6 +1,7 @@
 import type {
   AcrossDeposit,
   ChainStats,
+  OriginChainStats,
   TokenStats,
   RouteStats,
   OverviewStats,
@@ -173,6 +174,45 @@ export function computeChainLeaderboard(
       txShare: 0,
       recentTxCount: recentCounts.get(chainId) ?? 0,
       activityBuckets,
+    };
+  });
+
+  const totalVolume = entries.reduce((sum, e) => sum + e.volumeUsd, 0);
+  const totalTx = entries.reduce((sum, e) => sum + e.txCount, 0);
+
+  for (const e of entries) {
+    e.volumeShare = totalVolume > 0 ? e.volumeUsd / totalVolume : 0;
+    e.txShare = totalTx > 0 ? e.txCount / totalTx : 0;
+  }
+
+  return entries.sort((a, b) => b.volumeUsd - a.volumeUsd);
+}
+
+export function computeOriginChainLeaderboard(
+  deposits: AcrossDeposit[],
+  chainMap: ChainMap,
+  tokenMap: TokenMap
+): OriginChainStats[] {
+  const stats = new Map<number, { txCount: number; volumeUsd: number }>();
+
+  for (const d of deposits) {
+    const chainId = d.originChainId;
+    const entry = stats.get(chainId) ?? { txCount: 0, volumeUsd: 0 };
+    entry.txCount++;
+    entry.volumeUsd += getDepositVolumeUsd(d, tokenMap);
+    stats.set(chainId, entry);
+  }
+
+  const entries = Array.from(stats.entries()).map(([chainId, s]) => {
+    const chain = chainMap.get(chainId);
+    return {
+      chainId,
+      name: chain?.name ?? `Chain ${chainId}`,
+      logoUrl: chain?.logoUrl ?? "",
+      txCount: s.txCount,
+      volumeUsd: s.volumeUsd,
+      volumeShare: 0,
+      txShare: 0,
     };
   });
 
