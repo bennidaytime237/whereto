@@ -5,7 +5,7 @@ import { formatUsd, timeAgo, shortenAddress } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 const WHALE_THRESHOLD = 10_000;   // $10k+
-const SHARK_THRESHOLD = 2_500;    // $2.5k+
+const SHARK_THRESHOLD = 1_000;    // $1k+
 
 interface Props {
   deposits: AcrossDeposit[];
@@ -80,7 +80,7 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
         <span className="text-xs text-[var(--text-secondary)]">
           <span style={{ color: "#f59e0b" }}>🐋 $10k+</span>
           <span className="mx-2 opacity-40">·</span>
-          <span style={{ color: "#818cf8" }}>🦈 $2.5k+</span>
+          <span style={{ color: "#818cf8" }}>🦈 $1k+</span>
         </span>
       </div>
       <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
