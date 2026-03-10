@@ -119,20 +119,23 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
 
 function HotBadge({ count }: { count: number }) {
   if (count === 0) return null;
-  const label = count >= 5 ? "🔥 hot" : count >= 2 ? "↑ active" : "· recent";
-  const style =
-    count >= 5
-      ? { color: "#ff6b6b", background: "rgba(255, 107, 107, 0.15)", border: "1px solid rgba(255, 107, 107, 0.3)" }
-      : count >= 2
-      ? { color: "#f59e0b", background: "rgba(245, 158, 11, 0.12)", border: "1px solid rgba(245, 158, 11, 0.25)" }
-      : { color: "#9a9ba8", background: "rgba(154, 155, 168, 0.1)", border: "1px solid rgba(154, 155, 168, 0.2)" };
+  const dotColor = count >= 5 ? "#ff6b6b" : count >= 2 ? "#f59e0b" : "#9a9ba8";
+  const label = count >= 5 ? "hot" : count >= 2 ? "active" : "recent";
   return (
-    <span
-      className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none"
-      style={style}
-      title={`${count} tx in last 10 min`}
-    >
-      {label}
+    <span className="relative flex items-center gap-1" title={`${count} tx in last 10 min`}>
+      <span className="relative flex h-2 w-2">
+        {count >= 2 && (
+          <span
+            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+            style={{ background: dotColor }}
+          />
+        )}
+        <span
+          className="relative inline-flex rounded-full h-2 w-2"
+          style={{ background: dotColor }}
+        />
+      </span>
+      <span className="text-[10px] font-medium" style={{ color: dotColor }}>{label}</span>
     </span>
   );
 }
@@ -163,6 +166,11 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
         </div>
       </div>
 
+      {chains.length === 0 && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-8 text-center text-[var(--text-secondary)] text-sm">
+          No chain activity yet — check back shortly
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {chains.slice(0, 10).map((chain, i) => {
           const intensity = maxShare > 0 ? chain.volumeShare / maxShare : 0;

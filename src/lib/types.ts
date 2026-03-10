@@ -81,4 +81,7 @@ export interface OverviewStats {
   totalTransactions: number;
   avgBridgeTimeSec: number;
   uniqueChains: number;
+  largestTxUsd: number;
+  largestTxChain: string;
+  volumeTimeline: number[]; // 12 x 5-min buckets, oldest first
 }

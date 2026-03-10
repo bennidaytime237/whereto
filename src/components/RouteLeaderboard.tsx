@@ -17,6 +17,13 @@ export function RouteLeaderboard({ routes }: { routes: RouteStats[] }) {
             </tr>
           </thead>
           <tbody>
+            {routes.length === 0 && (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-[var(--text-secondary)] text-sm">
+                  No route data yet — check back shortly
+                </td>
+              </tr>
+            )}
             {routes.slice(0, 10).map((route, i) => (
               <tr
                 key={`${route.originChainId}-${route.destinationChainId}`}

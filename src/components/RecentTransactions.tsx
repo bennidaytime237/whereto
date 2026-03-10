@@ -57,6 +57,13 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
             </tr>
           </thead>
           <tbody>
+            {recent.length === 0 && (
+              <tr>
+                <td colSpan={7} className="p-8 text-center text-[var(--text-secondary)] text-sm">
+                  No filled transactions yet — check back shortly
+                </td>
+              </tr>
+            )}
             {recent.map((d) => {
               const origin = chainMap.get(d.originChainId);
               const dest = chainMap.get(d.destinationChainId);

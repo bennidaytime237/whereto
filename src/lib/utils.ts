@@ -54,15 +54,24 @@ function getBridgeTimeSec(deposit: AcrossDeposit): number | null {
 
 export function computeOverviewStats(
   deposits: AcrossDeposit[],
-  tokenMap: TokenMap
+  tokenMap: TokenMap,
+  chainMap?: import("./across").ChainMap
 ): OverviewStats {
   let totalVolumeUsd = 0;
   let bridgeTimeSum = 0;
   let bridgeTimeCount = 0;
+  let largestTxUsd = 0;
+  let largestTxChainId = 0;
   const chains = new Set<number>();
 
+  const BUCKET_COUNT = 12;
+  const BUCKET_MS = 5 * 60 * 1000;
+  const now = Date.now();
+  const timeline = Array.from({ length: BUCKET_COUNT }, () => 0);
+
   for (const d of deposits) {
-    totalVolumeUsd += getDepositVolumeUsd(d, tokenMap);
+    const vol = getDepositVolumeUsd(d, tokenMap);
+    totalVolumeUsd += vol;
     chains.add(d.originChainId);
     chains.add(d.destinationChainId);
     const bt = getBridgeTimeSec(d);
@@ -70,13 +79,28 @@ export function computeOverviewStats(
       bridgeTimeSum += bt;
       bridgeTimeCount++;
     }
+    if (vol > largestTxUsd) {
+      largestTxUsd = vol;
+      largestTxChainId = d.destinationChainId;
+    }
+    // bucket for sparkline
+    const age = now - new Date(d.depositBlockTimestamp).getTime();
+    const bucketIdx = Math.min(BUCKET_COUNT - 1, Math.floor(age / BUCKET_MS));
+    timeline[bucketIdx] += vol;
   }
+
+  // reverse so index 0 = oldest
+  const volumeTimeline = [...timeline].reverse();
+  const largestTxChain = chainMap?.get(largestTxChainId)?.name ?? `Chain ${largestTxChainId}`;
 
   return {
     totalVolumeUsd,
     totalTransactions: deposits.length,
     avgBridgeTimeSec: bridgeTimeCount > 0 ? bridgeTimeSum / bridgeTimeCount : 0,
     uniqueChains: chains.size,
+    largestTxUsd,
+    largestTxChain,
+    volumeTimeline,
   };
 }
 

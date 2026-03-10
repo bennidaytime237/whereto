@@ -59,7 +59,7 @@ export function Dashboard() {
       setTokenMap(tMap);
       setDeposits(deps1h);
 
-      setOverview(computeOverviewStats(deps1h, tMap));
+      setOverview(computeOverviewStats(deps1h, tMap, cMap));
       setChainLeaderboard(computeChainLeaderboard(deps1h, cMap, tMap, deps10m));
       setTokenLeaderboard(computeTokenLeaderboard(deps1h, tMap));
       setRouteLeaderboard(computeRouteLeaderboard(deps1h, cMap, tMap));

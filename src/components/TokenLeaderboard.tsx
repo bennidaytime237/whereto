@@ -17,6 +17,13 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenStats[] }) {
             </tr>
           </thead>
           <tbody>
+            {tokens.length === 0 && (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-[var(--text-secondary)] text-sm">
+                  No token data yet — check back shortly
+                </td>
+              </tr>
+            )}
             {tokens.map((token, i) => (
               <tr
                 key={token.symbol}
