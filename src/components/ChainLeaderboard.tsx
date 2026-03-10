@@ -42,7 +42,9 @@ function getRankBadge(rank: number): string {
 
 function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: number }[]; color: string }) {
   const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
-  const max = Math.max(...buckets.map((b) => b.txCount), 1);
+  const maxTx  = Math.max(...buckets.map((b) => b.txCount), 1);
+  const maxVol = Math.max(...buckets.map((b) => b.volumeUsd), 1);
+  const TOTAL_H = 64; // px — matches h-16
 
   const BUCKET_MINUTES = 5;
   const BUCKET_COUNT = buckets.length;
@@ -56,26 +58,38 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
 
   return (
     <div
-      className="relative flex items-center gap-[2px] w-full h-16"
+      className="relative flex items-end gap-[2px] w-full h-16"
       onMouseLeave={() => setHoveredIdx(null)}
     >
       {buckets.map((bucket, i) => {
-        const height = Math.max(0.1, bucket.txCount / max);
         const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.15;
-        const finalH = height * mirror;
+        // volume = bottom segment, tx = top segment
+        const volH  = Math.max(2, Math.round((bucket.volumeUsd / maxVol) * TOTAL_H * 0.55 * mirror));
+        const txH   = Math.max(2, Math.round((bucket.txCount  / maxTx)  * TOTAL_H * 0.45 * mirror));
         const isHovered = hoveredIdx === i;
+
         return (
           <div
             key={i}
-            className="relative flex-1 h-full cursor-default flex items-center"
+            className="relative flex-1 h-full cursor-default flex flex-col justify-end"
             onMouseEnter={() => setHoveredIdx(i)}
           >
+            {/* tx count — top segment */}
             <div
-              className="w-full rounded-full transition-all duration-300"
+              className="w-full rounded-t-full transition-all duration-300"
               style={{
-                height: `${Math.max(2, Math.round(finalH * 64))}px`,
+                height: `${txH}px`,
                 background: color,
-                opacity: isHovered ? 1 : 0.3 + finalH * 0.7,
+                opacity: isHovered ? 1 : 0.75,
+              }}
+            />
+            {/* volume — bottom segment */}
+            <div
+              className="w-full rounded-b-full transition-all duration-300"
+              style={{
+                height: `${volH}px`,
+                background: color,
+                opacity: isHovered ? 0.5 : 0.3,
               }}
             />
             {isHovered && (
