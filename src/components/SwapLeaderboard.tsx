@@ -5,14 +5,14 @@ export function SwapLeaderboard({ swaps }: { swaps: SwapStats[] }) {
   const maxTxShare = swaps[0]?.txShare ?? 1;
 
   return (
-    <section className="mb-8 flex flex-col">
+    <section className="mb-8">
       <h2 className="text-xl font-semibold mb-1">Top Swaps</h2>
       <p className="text-sm text-[var(--text-secondary)] mb-4">
         Most frequent swap routes · last hour
       </p>
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] divide-y divide-[var(--border)] overflow-hidden flex-1">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] divide-y divide-[var(--border)]">
         {swaps.length === 0 && (
-          <div className="px-4 py-8 text-center text-[var(--text-secondary)] text-sm">
+          <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
             No swap data yet — check back shortly
           </div>
         )}
@@ -21,7 +21,7 @@ export function SwapLeaderboard({ swaps }: { swaps: SwapStats[] }) {
           const key = `${swap.originChainId}-${swap.originTokenSymbol}-${swap.destinationChainId}-${swap.destinationTokenSymbol}`;
 
           return (
-            <div key={key} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-secondary)] transition-colors">
+            <div key={key} className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors">
 
               {/* Rank */}
               <span className="text-xs font-medium text-[var(--text-secondary)] w-5 shrink-0 tabular-nums">
@@ -30,7 +30,7 @@ export function SwapLeaderboard({ swaps }: { swaps: SwapStats[] }) {
 
               {/* Route */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {/* Origin */}
                   <div className="flex items-center gap-1">
                     {swap.originChainLogoUrl && (
@@ -43,7 +43,7 @@ export function SwapLeaderboard({ swaps }: { swaps: SwapStats[] }) {
                   </div>
                   <span className="text-[var(--text-secondary)] text-xs">on {swap.originChainName}</span>
 
-                  <span className="text-[var(--text-secondary)] text-xs mx-0.5">→</span>
+                  <span className="text-[var(--text-secondary)] text-sm mx-0.5">→</span>
 
                   {/* Destination */}
                   <div className="flex items-center gap-1">
@@ -59,7 +59,7 @@ export function SwapLeaderboard({ swaps }: { swaps: SwapStats[] }) {
                 </div>
 
                 {/* Bar */}
-                <div className="mt-1 h-1 rounded-full bg-white/10 w-full">
+                <div className="mt-1.5 h-1 rounded-full bg-white/10 w-full">
                   <div
                     className="h-1 rounded-full transition-all duration-500"
                     style={{
