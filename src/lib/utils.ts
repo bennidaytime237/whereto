@@ -264,16 +264,19 @@ export function computeSwapLeaderboard(
       destinationTokenLogoUrl: destToken?.logoUrl ?? "",
       txCount: s.txCount,
       volumeUsd: s.volumeUsd,
+      txShare: 0,
       volumeShare: 0,
     };
   });
 
+  const totalTx = entries.reduce((sum, e) => sum + e.txCount, 0);
   const totalVolume = entries.reduce((sum, e) => sum + e.volumeUsd, 0);
   for (const e of entries) {
+    e.txShare = totalTx > 0 ? e.txCount / totalTx : 0;
     e.volumeShare = totalVolume > 0 ? e.volumeUsd / totalVolume : 0;
   }
 
-  return entries.sort((a, b) => b.volumeUsd - a.volumeUsd).slice(0, 10);
+  return entries.sort((a, b) => b.txCount - a.txCount).slice(0, 10);
 }
 
 export function computeTokenLeaderboard(

@@ -89,6 +89,7 @@ export interface SwapStats {
   destinationTokenLogoUrl: string;
   txCount: number;
   volumeUsd: number;
+  txShare: number;
   volumeShare: number;
 }
 
