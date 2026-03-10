@@ -2,6 +2,7 @@ import type {
   AcrossDeposit,
   ChainStats,
   OriginChainStats,
+  WalletStats,
   TokenStats,
   RouteStats,
   OverviewStats,
@@ -225,6 +226,35 @@ export function computeOriginChainLeaderboard(
   }
 
   return entries.sort((a, b) => b.volumeUsd - a.volumeUsd);
+}
+
+export function computeWalletLeaderboard(
+  deposits: AcrossDeposit[],
+  tokenMap: TokenMap
+): WalletStats[] {
+  const stats = new Map<string, { txCount: number; volumeUsd: number }>();
+
+  for (const d of deposits) {
+    const addr = d.depositor.toLowerCase();
+    const entry = stats.get(addr) ?? { txCount: 0, volumeUsd: 0 };
+    entry.txCount++;
+    entry.volumeUsd += getDepositVolumeUsd(d, tokenMap);
+    stats.set(addr, entry);
+  }
+
+  const entries = Array.from(stats.entries()).map(([address, s]) => ({
+    address,
+    txCount: s.txCount,
+    volumeUsd: s.volumeUsd,
+    volumeShare: 0,
+  }));
+
+  const totalVolume = entries.reduce((sum, e) => sum + e.volumeUsd, 0);
+  for (const e of entries) {
+    e.volumeShare = totalVolume > 0 ? e.volumeUsd / totalVolume : 0;
+  }
+
+  return entries.sort((a, b) => b.volumeUsd - a.volumeUsd).slice(0, 10);
 }
 
 export function computeTokenLeaderboard(
