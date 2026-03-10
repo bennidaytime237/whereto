@@ -48,7 +48,8 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
           <thead>
             <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
               <th className="text-left p-4 font-medium">Time</th>
-              <th className="text-left p-4 font-medium">Route</th>
+              <th className="text-left p-4 font-medium">From</th>
+              <th className="text-left p-4 font-medium">To</th>
               <th className="text-left p-4 font-medium">Token</th>
               <th className="text-right p-4 font-medium">Amount</th>
               <th className="text-right p-4 font-medium">Bridge Time</th>
@@ -75,7 +76,10 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
                         <img src={origin.logoUrl} alt={origin.name} className="w-4 h-4 rounded-full" />
                       )}
                       <span>{origin?.name ?? `${d.originChainId}`}</span>
-                      <span className="text-[var(--text-secondary)]">&rarr;</span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-1.5">
                       {dest?.logoUrl && (
                         <img src={dest.logoUrl} alt={dest.name} className="w-4 h-4 rounded-full" />
                       )}
