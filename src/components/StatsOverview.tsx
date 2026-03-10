@@ -24,14 +24,22 @@ function Sparkline({ values, color = "#6DF9D9" }: { values: number[]; color?: st
   );
 }
 
-/** Smoothly counts from the previous value to the new target. */
+/** Smoothly counts from the previous value to the new target. Snaps on first mount. */
 function useCountUp(target: number, durationMs = 800): number {
   const [displayed, setDisplayed] = useState(target);
   const startRef = useRef<number>(target);
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
+    // First mount: snap immediately, no animation
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      startRef.current = target;
+      setDisplayed(target);
+      return;
+    }
     const from = startRef.current;
     if (from === target) return;
     startTimeRef.current = null;

@@ -94,23 +94,6 @@ export function Dashboard() {
     return () => clearInterval(ticker);
   }, [lastUpdated]);
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="skeleton h-24 rounded-xl" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-40 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="rounded-xl border border-[var(--red)] bg-[var(--red)]/10 p-6 text-center">
@@ -128,28 +111,51 @@ export function Dashboard() {
 
   return (
     <div>
-      {lastUpdated && (
-        <div className="flex items-center justify-end gap-2 mb-6">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <p className="text-xs text-[var(--text-secondary)]">
-            updated {secondsAgo < 5 ? "just now" : `${secondsAgo}s ago`} &middot; refreshes every 30s
-          </p>
+      {/* Status bar: hidden until first load completes */}
+      <div className="flex items-center justify-end gap-2 mb-6 h-4">
+        {lastUpdated && (
+          <>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <p className="text-xs text-[var(--text-secondary)]">
+              updated {secondsAgo < 5 ? "just now" : `${secondsAgo}s ago`} &middot; refreshes every 30s
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* Hero: Stats overview — skeletons until first data */}
+      {overview ? (
+        <StatsOverview stats={overview} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="skeleton h-24 rounded-xl" />
+          ))}
         </div>
       )}
 
-      {/* Hero: Stats overview */}
-      {overview && <StatsOverview stats={overview} />}
-
       {/* Primary: Chain destination heatmap */}
-      <ChainLeaderboard chains={chainLeaderboard} />
+      {chainLeaderboard.length > 0 ? (
+        <ChainLeaderboard chains={chainLeaderboard} />
+      ) : (
+        <div className="skeleton h-48 rounded-xl mb-8" />
+      )}
 
       {/* Supporting: 2x2 leaderboard grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <OriginChainLeaderboard chains={originLeaderboard} />
-        <TokenLeaderboard tokens={tokenLeaderboard} />
-        <RouteLeaderboard routes={routeLeaderboard} />
-        <SwapLeaderboard swaps={swapLeaderboard} />
-      </div>
+      {originLeaderboard.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <OriginChainLeaderboard chains={originLeaderboard} />
+          <TokenLeaderboard tokens={tokenLeaderboard} />
+          <RouteLeaderboard routes={routeLeaderboard} />
+          <SwapLeaderboard swaps={swapLeaderboard} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="skeleton h-96 rounded-xl" />
+          ))}
+        </div>
+      )}
 
       <RecentTransactions deposits={deposits} chainMap={chainMap} tokenMap={tokenMap} />
     </div>
