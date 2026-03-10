@@ -302,7 +302,8 @@ export function computeTokenLeaderboard(
 
   return Array.from(stats.entries())
     .map(([symbol, s]) => ({ symbol, ...s }))
-    .sort((a, b) => b.volumeUsd - a.volumeUsd);
+    .sort((a, b) => b.volumeUsd - a.volumeUsd)
+    .slice(0, 10);
 }
 
 export function computeRouteLeaderboard(
