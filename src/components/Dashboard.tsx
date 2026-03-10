@@ -9,19 +9,19 @@ import {
   type ChainMap,
   type TokenMap,
 } from "@/lib/across";
-import type { AcrossDeposit, ChainStats, OriginChainStats, WalletStats, TokenStats, RouteStats, OverviewStats } from "@/lib/types";
+import type { AcrossDeposit, ChainStats, OriginChainStats, SwapStats, TokenStats, RouteStats, OverviewStats } from "@/lib/types";
 import {
   computeOverviewStats,
   computeChainLeaderboard,
   computeOriginChainLeaderboard,
-  computeWalletLeaderboard,
+  computeSwapLeaderboard,
   computeTokenLeaderboard,
   computeRouteLeaderboard,
 } from "@/lib/utils";
 import { StatsOverview } from "./StatsOverview";
 import { ChainLeaderboard } from "./ChainLeaderboard";
 import { OriginChainLeaderboard } from "./OriginChainLeaderboard";
-import { WalletLeaderboard } from "./WalletLeaderboard";
+import { SwapLeaderboard } from "./SwapLeaderboard";
 import { TokenLeaderboard } from "./TokenLeaderboard";
 import { RouteLeaderboard } from "./RouteLeaderboard";
 import { RecentTransactions } from "./RecentTransactions";
@@ -43,7 +43,7 @@ export function Dashboard() {
   const [overview, setOverview] = useState<OverviewStats | null>(null);
   const [chainLeaderboard, setChainLeaderboard] = useState<ChainStats[]>([]);
   const [originLeaderboard, setOriginLeaderboard] = useState<OriginChainStats[]>([]);
-  const [walletLeaderboard, setWalletLeaderboard] = useState<WalletStats[]>([]);
+  const [swapLeaderboard, setSwapLeaderboard] = useState<SwapStats[]>([]);
   const [tokenLeaderboard, setTokenLeaderboard] = useState<TokenStats[]>([]);
   const [routeLeaderboard, setRouteLeaderboard] = useState<RouteStats[]>([]);
 
@@ -68,7 +68,7 @@ export function Dashboard() {
       setOverview(computeOverviewStats(deps1h, tMap, cMap));
       setChainLeaderboard(computeChainLeaderboard(deps1h, cMap, tMap, deps10m));
       setOriginLeaderboard(computeOriginChainLeaderboard(deps1h, cMap, tMap));
-      setWalletLeaderboard(computeWalletLeaderboard(deps1h, tMap));
+      setSwapLeaderboard(computeSwapLeaderboard(deps1h, cMap, tMap));
       setTokenLeaderboard(computeTokenLeaderboard(deps1h, tMap));
       setRouteLeaderboard(computeRouteLeaderboard(deps1h, cMap, tMap));
       setLastUpdated(new Date());
@@ -148,7 +148,7 @@ export function Dashboard() {
         <OriginChainLeaderboard chains={originLeaderboard} />
         <TokenLeaderboard tokens={tokenLeaderboard} />
         <RouteLeaderboard routes={routeLeaderboard} />
-        <WalletLeaderboard wallets={walletLeaderboard} />
+        <SwapLeaderboard swaps={swapLeaderboard} />
       </div>
 
       <RecentTransactions deposits={deposits} chainMap={chainMap} tokenMap={tokenMap} />

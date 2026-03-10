@@ -76,11 +76,20 @@ export interface RouteStats {
   volumeUsd: number;
 }
 
-export interface WalletStats {
-  address: string;
+export interface SwapStats {
+  originChainId: number;
+  originChainName: string;
+  originChainLogoUrl: string;
+  originTokenSymbol: string;
+  originTokenLogoUrl: string;
+  destinationChainId: number;
+  destinationChainName: string;
+  destinationChainLogoUrl: string;
+  destinationTokenSymbol: string;
+  destinationTokenLogoUrl: string;
   txCount: number;
   volumeUsd: number;
-  volumeShare: number; // 0-1 of total volume
+  volumeShare: number;
 }
 
 export interface OriginChainStats {

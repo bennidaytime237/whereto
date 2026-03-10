@@ -2,7 +2,7 @@ import type {
   AcrossDeposit,
   ChainStats,
   OriginChainStats,
-  WalletStats,
+  SwapStats,
   TokenStats,
   RouteStats,
   OverviewStats,
@@ -228,26 +228,45 @@ export function computeOriginChainLeaderboard(
   return entries.sort((a, b) => b.volumeUsd - a.volumeUsd);
 }
 
-export function computeWalletLeaderboard(
+export function computeSwapLeaderboard(
   deposits: AcrossDeposit[],
+  chainMap: ChainMap,
   tokenMap: TokenMap
-): WalletStats[] {
+): SwapStats[] {
   const stats = new Map<string, { txCount: number; volumeUsd: number }>();
 
   for (const d of deposits) {
-    const addr = d.depositor.toLowerCase();
-    const entry = stats.get(addr) ?? { txCount: 0, volumeUsd: 0 };
+    const key = `${d.originChainId}:${d.inputToken.toLowerCase()}:${d.destinationChainId}:${d.outputToken.toLowerCase()}`;
+    const entry = stats.get(key) ?? { txCount: 0, volumeUsd: 0 };
     entry.txCount++;
     entry.volumeUsd += getDepositVolumeUsd(d, tokenMap);
-    stats.set(addr, entry);
+    stats.set(key, entry);
   }
 
-  const entries = Array.from(stats.entries()).map(([address, s]) => ({
-    address,
-    txCount: s.txCount,
-    volumeUsd: s.volumeUsd,
-    volumeShare: 0,
-  }));
+  const entries = Array.from(stats.entries()).map(([key, s]) => {
+    const [originChainId, inputToken, destinationChainId, outputToken] = key.split(":");
+    const oCid = Number(originChainId);
+    const dCid = Number(destinationChainId);
+    const originChain = chainMap.get(oCid);
+    const destChain = chainMap.get(dCid);
+    const originToken = tokenMap.get(`${oCid}-${inputToken}`);
+    const destToken = tokenMap.get(`${dCid}-${outputToken}`);
+    return {
+      originChainId: oCid,
+      originChainName: originChain?.name ?? `Chain ${oCid}`,
+      originChainLogoUrl: originChain?.logoUrl ?? "",
+      originTokenSymbol: originToken?.symbol ?? "???",
+      originTokenLogoUrl: originToken?.logoUrl ?? "",
+      destinationChainId: dCid,
+      destinationChainName: destChain?.name ?? `Chain ${dCid}`,
+      destinationChainLogoUrl: destChain?.logoUrl ?? "",
+      destinationTokenSymbol: destToken?.symbol ?? "???",
+      destinationTokenLogoUrl: destToken?.logoUrl ?? "",
+      txCount: s.txCount,
+      volumeUsd: s.volumeUsd,
+      volumeShare: 0,
+    };
+  });
 
   const totalVolume = entries.reduce((sum, e) => sum + e.volumeUsd, 0);
   for (const e of entries) {
