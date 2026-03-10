@@ -1,6 +1,9 @@
+import { useState } from "react";
 import type { AcrossDeposit } from "@/lib/types";
 import type { ChainMap, TokenMap } from "@/lib/across";
 import { formatUsd, timeAgo, shortenAddress } from "@/lib/utils";
+
+const PAGE_SIZE = 20;
 
 interface Props {
   deposits: AcrossDeposit[];
@@ -9,7 +12,9 @@ interface Props {
 }
 
 export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
-  const recent = deposits.filter((d) => d.status === "filled").slice(0, 20);
+  const [showCount, setShowCount] = useState(PAGE_SIZE);
+  const filled = deposits.filter((d) => d.status === "filled");
+  const recent = filled.slice(0, showCount);
 
   function getTokenSymbol(chainId: number, tokenAddress: string): string {
     const token = tokenMap.get(`${chainId}-${tokenAddress.toLowerCase()}`);
@@ -122,6 +127,31 @@ export function RecentTransactions({ deposits, chainMap, tokenMap }: Props) {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination controls */}
+      {filled.length > showCount && (
+        <div className="mt-3 flex items-center justify-center gap-3">
+          <button
+            onClick={() => setShowCount((c) => c + PAGE_SIZE)}
+            className="px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] text-sm text-[var(--text-secondary)] hover:text-white hover:border-[var(--accent)] transition-all duration-200"
+          >
+            Show more
+            <span className="ml-1.5 text-xs opacity-60">
+              ({filled.length - showCount} remaining)
+            </span>
+          </button>
+        </div>
+      )}
+      {showCount > PAGE_SIZE && filled.length <= showCount && filled.length > 0 && (
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={() => setShowCount(PAGE_SIZE)}
+            className="px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] text-sm text-[var(--text-secondary)] hover:text-white transition-all duration-200"
+          >
+            Show less
+          </button>
+        </div>
+      )}
     </section>
   );
 }

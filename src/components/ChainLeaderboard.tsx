@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { ChainStats } from "@/lib/types";
 import { formatUsd, formatTime } from "@/lib/utils";
 
@@ -130,29 +130,74 @@ function HotBadge({ count }: { count: number }) {
   );
 }
 
+type SortKey = "volume" | "txCount";
+
 export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
-  // Normalize intensities: the top chain = 1.0
+  const [sortBy, setSortBy] = useState<SortKey>("volume");
+
+  // Sort a copy so we don't mutate props
+  const sorted = [...chains].sort((a, b) =>
+    sortBy === "volume" ? b.volumeUsd - a.volumeUsd : b.txCount - a.txCount
+  );
+
+  // Normalize intensities: always based on volumeShare (heat = money flowing in)
   const maxShare = chains[0]?.volumeShare ?? 1;
+
+  // For the bar, normalize to the top chain in current sort so bars fill relative to #1
+  const maxBarValue =
+    sortBy === "volume"
+      ? sorted[0]?.volumeUsd ?? 1
+      : sorted[0]?.txCount ?? 1;
 
   return (
     <section className="mb-10">
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold">Where is the money going?</h2>
           <p className="text-[var(--text-secondary)] mt-1">
-            Destination chains ranked by inflow volume &middot; last hour
+            Destination chains ranked by inflow&nbsp;
+            {sortBy === "volume" ? "volume" : "transaction count"}
+            &nbsp;&middot; last hour
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-          <span>Low</span>
-          <div className="flex gap-0.5">
-            <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(59, 130, 246, 0.4)" }} />
-            <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(6, 182, 212, 0.5)" }} />
-            <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(16, 185, 129, 0.6)" }} />
-            <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(245, 158, 11, 0.7)" }} />
-            <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(239, 68, 68, 0.8)" }} />
+
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Sort toggle */}
+          <div className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-1 text-xs">
+            <button
+              onClick={() => setSortBy("volume")}
+              className={`px-3 py-1 rounded-md transition-all duration-200 font-medium ${
+                sortBy === "volume"
+                  ? "bg-[var(--accent)] text-black"
+                  : "text-[var(--text-secondary)] hover:text-white"
+              }`}
+            >
+              Volume
+            </button>
+            <button
+              onClick={() => setSortBy("txCount")}
+              className={`px-3 py-1 rounded-md transition-all duration-200 font-medium ${
+                sortBy === "txCount"
+                  ? "bg-[var(--accent)] text-black"
+                  : "text-[var(--text-secondary)] hover:text-white"
+              }`}
+            >
+              Tx Count
+            </button>
           </div>
-          <span>High</span>
+
+          {/* Heat legend */}
+          <div className="hidden sm:flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+            <span>Low</span>
+            <div className="flex gap-0.5">
+              <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(59, 130, 246, 0.4)" }} />
+              <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(6, 182, 212, 0.5)" }} />
+              <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(16, 185, 129, 0.6)" }} />
+              <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(245, 158, 11, 0.7)" }} />
+              <div className="w-5 h-3 rounded-sm" style={{ background: "rgba(239, 68, 68, 0.8)" }} />
+            </div>
+            <span>High</span>
+          </div>
         </div>
       </div>
 
@@ -161,10 +206,17 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
           No chain activity yet — check back shortly
         </div>
       )}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {chains.slice(0, 10).map((chain, i) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        {sorted.slice(0, 10).map((chain, i) => {
+          // Heat colour always based on volume share (activity heat)
           const intensity = maxShare > 0 ? chain.volumeShare / maxShare : 0;
           const rank = i + 1;
+
+          // Bar fills relative to the top chain in current sort
+          const barPct =
+            sortBy === "volume"
+              ? maxBarValue > 0 ? (chain.volumeUsd / maxBarValue) * 100 : 0
+              : maxBarValue > 0 ? (chain.txCount / maxBarValue) * 100 : 0;
 
           return (
             <div
@@ -192,27 +244,36 @@ export function ChainLeaderboard({ chains }: { chains: ChainStats[] }) {
                 <HotBadge count={chain.recentTxCount} />
               </div>
 
-              {/* Volume */}
+              {/* Primary metric */}
               <div className="text-base font-bold tabular-nums mb-1.5">
-                {formatUsd(chain.volumeUsd)}
+                {sortBy === "volume" ? formatUsd(chain.volumeUsd) : `${chain.txCount.toLocaleString()} txns`}
               </div>
+
+              {/* Secondary metric */}
+              {sortBy === "txCount" && (
+                <div className="text-xs text-[var(--text-secondary)] tabular-nums mb-1.5">
+                  {formatUsd(chain.volumeUsd)}
+                </div>
+              )}
 
               {/* Soundwave activity */}
               <div className="mb-2">
                 <Soundwave buckets={chain.activityBuckets} color={getHeatBorder(intensity)} />
               </div>
 
-              {/* Volume share bar */}
+              {/* Relative share bar */}
               <div className="mt-2">
                 <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] mb-1">
-                  <span className="tabular-nums">{chain.txCount} txns</span>
-                  <span className="tabular-nums">{(chain.volumeShare * 100).toFixed(1)}%</span>
+                  <span className="tabular-nums">
+                    {sortBy === "volume" ? `${chain.txCount} txns` : formatUsd(chain.volumeUsd)}
+                  </span>
+                  <span className="tabular-nums">{barPct.toFixed(1)}%</span>
                 </div>
                 <div className="w-full h-1 rounded-full bg-white/10">
                   <div
                     className="h-1 rounded-full transition-all duration-500"
                     style={{
-                      width: `${(chain.volumeShare * 100).toFixed(1)}%`,
+                      width: `${barPct.toFixed(1)}%`,
                       background: getHeatBorder(intensity),
                     }}
                   />
