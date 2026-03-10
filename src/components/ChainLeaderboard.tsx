@@ -42,9 +42,8 @@ function getRankBadge(rank: number): string {
 
 function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: number }[]; color: string }) {
   const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
-  const maxTx  = Math.max(...buckets.map((b) => b.txCount), 1);
   const maxVol = Math.max(...buckets.map((b) => b.volumeUsd), 1);
-  const TOTAL_H = 64; // px — matches h-16
+  const TOTAL_H = 64;
 
   const BUCKET_MINUTES = 5;
   const BUCKET_COUNT = buckets.length;
@@ -62,10 +61,9 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
       onMouseLeave={() => setHoveredIdx(null)}
     >
       {buckets.map((bucket, i) => {
+        const norm = bucket.volumeUsd / maxVol;
         const mirror = 1 - Math.abs((i / (buckets.length - 1)) * 2 - 1) * 0.15;
-        // Each half grows outward from center
-        const volHalf = Math.max(1, Math.round((bucket.volumeUsd / maxVol) * (TOTAL_H / 2) * 0.9 * mirror));
-        const txHalf  = Math.max(1, Math.round((bucket.txCount  / maxTx)  * (TOTAL_H / 2) * 0.9 * mirror));
+        const half = Math.max(1, Math.round(norm * (TOTAL_H / 2) * 0.9 * mirror));
         const isHovered = hoveredIdx === i;
 
         return (
@@ -74,25 +72,17 @@ function Soundwave({ buckets, color }: { buckets: { txCount: number; volumeUsd: 
             className="relative flex-1 h-full cursor-default flex flex-col items-center justify-center"
             onMouseEnter={() => setHoveredIdx(i)}
           >
-            {/* tx count — top half, grows upward */}
+            {/* top half — grows upward */}
             <div
               className="w-full rounded-t-full transition-all duration-300"
-              style={{
-                height: `${txHalf}px`,
-                background: color,
-                opacity: isHovered ? 1 : 0.8,
-              }}
+              style={{ height: `${half}px`, background: color, opacity: isHovered ? 1 : 0.75 }}
             />
-            {/* 1px gap in the middle */}
+            {/* 1px centre gap */}
             <div className="w-full" style={{ height: 1 }} />
-            {/* volume — bottom half, grows downward */}
+            {/* bottom half — mirror */}
             <div
               className="w-full rounded-b-full transition-all duration-300"
-              style={{
-                height: `${volHalf}px`,
-                background: color,
-                opacity: isHovered ? 0.55 : 0.35,
-              }}
+              style={{ height: `${half}px`, background: color, opacity: isHovered ? 1 : 0.75 }}
             />
             {isHovered && (
               <div
